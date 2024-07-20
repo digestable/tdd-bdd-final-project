@@ -225,6 +225,67 @@ class TestProductModel(unittest.TestCase):
         self.assertEqual(found.count(), count)
         for product in found:
             self.assertEqual(product.category, category)
+            
 
-    
+    # Increase coverage >95% by adding four extra tests, increasing coverage from 93%
+    def test_find_by_price(self):
+        """It should Find Products by Price"""
+        products = ProductFactory.create_batch(10)
+        for product in products:
+            product.create()
+        price = products[0].price
+        count = len([product for product in products if product.price == price])
+        found = Product.find_by_price(price)
+        self.assertEqual(found.count(), count)
+        for product in found:
+            self.assertEqual(product.price, price)
+
+
+    # Deserializes a Product - available not bool datavalidation error
+    def test_deserialize_available_not_bool(self):
+        """It should get DataValidation error when available not bool type"""
+        product = ProductFactory()
+        data = {
+            "name": "Test Product",
+            "description": "A test product",
+            "price": "19.99",
+            "available": "yes",  # Invalid type for testing
+            "category": "ELECTRONICS"
+        }
+        with self.assertRaises(DataValidationError) as context:
+            product.deserialize(data)
+        self.assertIn("Invalid type for boolean [available]", str(context.exception))
+
+    # Deserializes a Product - invalid attribute raises datavalidation error
+    def test_deserialize_invalid_category(self):
+        """It should show invalid category raises datavalidation error"""
+        product = ProductFactory()
+        data = {
+            "name": "Test Product",
+            "description": "A test product",
+            "price": "19.99",
+            "available": True,  
+            "category": "INVALID_CATEGORY"
+        }
+        
+        with self.assertRaises(DataValidationError) as context:
+            product.deserialize(data)
+        self.assertIn("Invalid attribute:", str(context.exception))
+
+    # Deserializes a Product - invalid type raises datavalidation error
+    def test_deserialize_invalid_data_type(self):
+        """It should show invalid category raises datavalidation error"""
+        product = ProductFactory()
+        data = 'Not_dict'        
+        with self.assertRaises(DataValidationError) as context:
+            product.deserialize(data)
+        self.assertIn("Invalid product: body of request contained bad or no data", str(context.exception))
+
+    # Strip function in find_by_price function
+    def test_valid_price_function(self):
+        """It should Strip function in find_by_price function"""
+        price = "12.22"
+        price_clean = Product.find_by_price(price)
+        self.assertFalse(type(price_clean) is Decimal)
+       
 
