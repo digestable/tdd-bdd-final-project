@@ -144,7 +144,7 @@ class TestProductModel(unittest.TestCase):
         self.assertEqual(products[0].description, "test desc")
 
     # Test to update a product with invalid id EXTRA SAD
-    def test_update_a_product(self):
+    def test_update_a_product_invaliid_update(self):
         """It should not Update a Product and return 404"""
         product = ProductFactory()
         product.id = None
